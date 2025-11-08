@@ -74,13 +74,13 @@ def _ensure_naive_utc(
 
 
 def _from_epoch_like(
-    val: numbers.Real,
+    val: int | float,
 ) -> datetime:
     """Accept seconds, ms, or μs since epoch. Try in that order."""
     for div in (1, 1_000, 1_000_000):
         try:
             return datetime.fromtimestamp(
-                val / div,
+                float(val) / div,
                 tz=timezone.utc,
             ).replace(
                 tzinfo=None,
