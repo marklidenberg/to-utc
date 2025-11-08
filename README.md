@@ -1,12 +1,12 @@
-# to-naive-utc
+# to-utc
 
-Timezones are error-prone. The safest approach is to store and process datetimes in **naive UTC** and add timezones only at the presentation layer.
+Timezones are error-prone. The safest approach is to store and process datetimes in **UTC** consistently.
 
-* `to_naive_utc`: converts any datetime-like value to a naive UTC `datetime.datetime`
+* `to_utc`: converts any datetime-like value to a UTC-aware `datetime.datetime`
 * `to_timedelta`: converts any timedelta-like value to `datetime.timedelta`
 
 ```python
-def to_naive_utc(value: Union[
+def to_utc(value: Union[
     datetime,
     str,
     int,
@@ -61,10 +61,10 @@ def to_timedelta(value: Union[
 
 ...
 
-from to_naive_utc import to_naive_utc, to_timedelta
+from to_utc import to_utc, to_timedelta
 
-to_naive_utc("2024-01-01T15:00:00+03:00")  # -> datetime(2024, 1, 1, 12, 0, 0)
-to_naive_utc(1754942420)  # -> datetime(2025, 08, 11, 20, 0, 20)
+to_utc("2024-01-01T15:00:00+03:00")  # -> datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+to_utc(1754942420)  # -> datetime(2025, 08, 11, 20, 0, 20, tzinfo=timezone.utc)
 
 to_timedelta(120)    # -> timedelta(minutes=2)
 to_timedelta("1h30m15s")    # -> timedelta(hours=1, minutes=30, seconds=15)

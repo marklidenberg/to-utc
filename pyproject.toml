@@ -1,7 +1,7 @@
 [project]
-name = "to-naive-utc"
+name = "to-utc"
 version = "0.1.2"
-description = "Convert any datetime-like object in Python to naive UTC. No timezone - no problems"
+description = "Convert any datetime-like object in Python to UTC-aware datetime"
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [

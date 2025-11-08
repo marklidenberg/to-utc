@@ -62,14 +62,14 @@ DatetimeLike = Union[
 ]
 
 
-def _ensure_naive_utc(
+def _ensure_utc(
     dt: datetime,
 ) -> datetime:
-    """Return naive datetime in UTC."""
+    """Return UTC-aware datetime."""
     if dt.tzinfo:
-        dt = dt.astimezone(timezone.utc).replace(
-            tzinfo=None,
-        )
+        dt = dt.astimezone(timezone.utc)
+    else:
+        dt = dt.replace(tzinfo=timezone.utc)
     return dt
 
 
@@ -82,54 +82,51 @@ def _from_epoch_like(
             return datetime.fromtimestamp(
                 float(val) / div,
                 tz=timezone.utc,
-            ).replace(
-                tzinfo=None,
             )
         except Exception:
             continue
     raise Exception(f"Numeric out of bounds for datetime: {val}")
 
 
-def to_naive_utc(
+def to_utc(
     value: DatetimeLike,
 ) -> datetime:
-    """Converts any datetime-like value to a naive UTC datetime."""
+    """Converts any datetime-like value to a UTC-aware datetime."""
 
     # - Pendulum
 
     if HAS_PENDULUM and isinstance(value, pendulum.DateTime):
-        return value.in_timezone(pendulum.UTC).naive()
+        return (
+            value.in_timezone(pendulum.UTC)
+            .in_timezone("UTC")
+            .replace(tzinfo=timezone.utc)
+        )
 
     # - Builtin datetime/date
 
     if isinstance(value, datetime):
-        return _ensure_naive_utc(value)
+        return _ensure_utc(value)
     if isinstance(value, date):
         return datetime(
             year=value.year,
             month=value.month,
             day=value.day,
+            tzinfo=timezone.utc,
         )
 
     # - Arrow
 
     if HAS_ARROW and isinstance(value, arrow.Arrow):
-        return value.to("UTC").naive
+        return value.to("UTC").datetime.replace(tzinfo=timezone.utc)
 
     # - Pandas.Timestamp
 
     if HAS_PANDAS and isinstance(value, pd.Timestamp):
         if value.tz is not None:
-            return (
-                value.tz_convert("UTC")
-                .to_pydatetime()
-                .replace(
-                    tzinfo=None,
-                )
-            )
+            return value.tz_convert("UTC").to_pydatetime()
         if value is pd.NaT:
             raise Exception("pandas.NaT is not a valid datetime")
-        return value.to_pydatetime()  # naive already
+        return value.to_pydatetime().replace(tzinfo=timezone.utc)  # naive, add UTC
 
     # - Numpy.datetime64
 
@@ -139,19 +136,13 @@ def to_naive_utc(
 
         # Use pandas for robust conversion if available
         if HAS_PANDAS:
-            return (
-                pd.to_datetime(
-                    value,
-                    utc=True,
-                )
-                .to_pydatetime()
-                .replace(
-                    tzinfo=None,
-                )
-            )
+            return pd.to_datetime(
+                value,
+                utc=True,
+            ).to_pydatetime()
 
         # Fallback via ISO string
-        return to_naive_utc(str(value))
+        return to_utc(str(value))
 
     # - Numpy scalar integers/floats (epoch)
 
@@ -173,22 +164,20 @@ def to_naive_utc(
         # - Now
 
         if s == "now":
-            return datetime.now(timezone.utc).replace(
-                tzinfo=None,
-            )
+            return datetime.now(timezone.utc)
 
         # - Try common patterns first
 
         for pattern in COMMON_DATETIME_PATTERNS:
             try:
-                return _ensure_naive_utc(datetime.strptime(s, pattern))
+                return _ensure_utc(datetime.strptime(s, pattern))
             except Exception:
                 continue
 
         # - Fallback: dateutil
 
         try:
-            return _ensure_naive_utc(parse_date(s))
+            return _ensure_utc(parse_date(s))
         except Exception:
             raise Exception(f"Unknown string datetime format: {value}")
 
@@ -198,11 +187,17 @@ def to_naive_utc(
 def test():
     # - Strings
 
-    assert to_naive_utc("2020.01.01") == datetime(2020, 1, 1)
-    assert to_naive_utc("2022-09-05T15:00:00") == datetime(2022, 9, 5, 15, 0, 0)
-    assert to_naive_utc("2022-09-05T18:00:00+03:00") == datetime(2022, 9, 5, 15, 0, 0)
-    assert to_naive_utc("2025-08-11T14:23:45Z") == datetime(2025, 8, 11, 14, 23, 45)
-    assert isinstance(to_naive_utc("now"), datetime)
+    assert to_utc("2020.01.01") == datetime(2020, 1, 1, tzinfo=timezone.utc)
+    assert to_utc("2022-09-05T15:00:00") == datetime(
+        2022, 9, 5, 15, 0, 0, tzinfo=timezone.utc
+    )
+    assert to_utc("2022-09-05T18:00:00+03:00") == datetime(
+        2022, 9, 5, 15, 0, 0, tzinfo=timezone.utc
+    )
+    assert to_utc("2025-08-11T14:23:45Z") == datetime(
+        2025, 8, 11, 14, 23, 45, tzinfo=timezone.utc
+    )
+    assert isinstance(to_utc("now"), datetime)
 
     # - Datetime/date
 
@@ -214,10 +209,10 @@ def test():
         0,
         tzinfo=timezone.utc,
     )
-    assert to_naive_utc(aware) == datetime(2024, 1, 1, 12, 0)
+    assert to_utc(aware) == datetime(2024, 1, 1, 12, 0, tzinfo=timezone.utc)
     naive = datetime(2024, 1, 1, 12, 0)
-    assert to_naive_utc(naive) == naive
-    assert to_naive_utc(date(2024, 1, 1)) == datetime(2024, 1, 1)
+    assert to_utc(naive) == datetime(2024, 1, 1, 12, 0, tzinfo=timezone.utc)
+    assert to_utc(date(2024, 1, 1)) == datetime(2024, 1, 1, tzinfo=timezone.utc)
 
     # - Pendulum
 
@@ -228,40 +223,34 @@ def test():
         15,
         tz="Europe/Luxembourg",
     )
-    assert to_naive_utc(pdt) == datetime(2024, 1, 1, 14, 0)
+    assert to_utc(pdt) == datetime(2024, 1, 1, 14, 0, tzinfo=timezone.utc)
 
     # - Epoch numbers
 
-    assert to_naive_utc(1_700_000_000) == datetime.fromtimestamp(
+    assert to_utc(1_700_000_000) == datetime.fromtimestamp(
         1_700_000_000,
         tz=timezone.utc,
-    ).replace(
-        tzinfo=None,
     )
-    assert to_naive_utc(1_700_000_000_000) == datetime.fromtimestamp(
+    assert to_utc(1_700_000_000_000) == datetime.fromtimestamp(
         1_700_000_000,
         tz=timezone.utc,
-    ).replace(
-        tzinfo=None,
     )  # ms
-    assert to_naive_utc(1_700_000_000_000_000) == datetime.fromtimestamp(
+    assert to_utc(1_700_000_000_000_000) == datetime.fromtimestamp(
         1_700_000_000,
         tz=timezone.utc,
-    ).replace(
-        tzinfo=None,
     )  # μs
 
     # - Pandas
 
     ts_naive = pd.Timestamp(2024, 2, 1, 10, 30, 5)
-    assert to_naive_utc(ts_naive) == datetime(2024, 2, 1, 10, 30, 5)
+    assert to_utc(ts_naive) == datetime(2024, 2, 1, 10, 30, 5, tzinfo=timezone.utc)
     ts_aware = pd.Timestamp(
         "2024-02-01T10:30:05",
         tz="Europe/Luxembourg",
     )
-    assert to_naive_utc(ts_aware) == datetime(2024, 2, 1, 9, 30, 5)
+    assert to_utc(ts_aware) == datetime(2024, 2, 1, 9, 30, 5, tzinfo=timezone.utc)
     try:
-        to_naive_utc(pd.NaT)  # should raise
+        to_utc(pd.NaT)  # should raise
         assert False, "Expected exception for pandas.NaT"
     except Exception:
         pass
@@ -269,19 +258,17 @@ def test():
     # - Numpy
 
     dt64 = np.datetime64("2024-03-01T12:00:00Z")
-    assert to_naive_utc(dt64) == datetime(2024, 3, 1, 12, 0, 0)
+    assert to_utc(dt64) == datetime(2024, 3, 1, 12, 0, 0, tzinfo=timezone.utc)
     dt64_local = np.datetime64("2024-03-01T12:00:00")  # treated as naive
 
-    # dateutil will treat as naive local then _ensure_naive_utc keeps naive
-    assert to_naive_utc(dt64_local) == datetime(2024, 3, 1, 12, 0, 0)
-    assert to_naive_utc(np.int64(1_700_000_000)) == datetime.fromtimestamp(
+    # dateutil will treat as naive local then _ensure_utc adds UTC
+    assert to_utc(dt64_local) == datetime(2024, 3, 1, 12, 0, 0, tzinfo=timezone.utc)
+    assert to_utc(np.int64(1_700_000_000)) == datetime.fromtimestamp(
         1_700_000_000,
         tz=timezone.utc,
-    ).replace(
-        tzinfo=None,
     )
     try:
-        to_naive_utc(np.datetime64("NaT"))
+        to_utc(np.datetime64("NaT"))
         assert False, "Expected exception for numpy NaT"
     except Exception:
         pass
@@ -289,7 +276,7 @@ def test():
     # - Arrow
 
     arw = arrow.get("2024-04-01T10:00:00+02:00")
-    assert to_naive_utc(arw) == datetime(2024, 4, 1, 8, 0, 0)
+    assert to_utc(arw) == datetime(2024, 4, 1, 8, 0, 0, tzinfo=timezone.utc)
 
 
 if __name__ == "__main__":
