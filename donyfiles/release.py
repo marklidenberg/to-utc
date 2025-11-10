@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, cast
 
 import dony
 
@@ -22,14 +22,17 @@ def release(
 
     # - Select default arguments
 
-    version = dony.select(
-        "Choose version",
-        choices=[
-            "patch",
-            "minor",
-            "major",
-        ],
-        provided=version,
+    version = cast(
+        str,
+        dony.select(
+            "Choose version",
+            choices=[
+                "patch",
+                "minor",
+                "major",
+            ],
+            provided=version,
+        ),
     )
 
     uv_publish_token = dony.input(

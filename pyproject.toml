@@ -1,7 +1,7 @@
 [project]
-name = "to-naive-utc"
+name = "to-utc"
 version = "0.1.2"
-description = "Convert any datetime-like object in Python to naive UTC. No timezone - no problems"
+description = "Convert any datetime-like object in Python to UTC-aware datetime"
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [
@@ -31,8 +31,9 @@ dev = [
     "numpy>=1.24.4",
     "pendulum>=3.0.0",
     "arrow>=1.3.0",
-    "dony>=0.2.1"
-]
+    "dony>=0.2.1",
+    "freezegun>=1.5.5"
+] # uv pip install ".[dev]"
 
 [build-system]
 requires = ["hatchling"]
