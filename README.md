@@ -2,7 +2,9 @@
 
 Timezones are error-prone. The safest approach is to store and process datetimes in **UTC** consistently.
 
-* `to_utc`: converts any datetime-like value to a UTC-aware `datetime.datetime`
+* `to_utc`: converts any datetime-like value to a **UTC-aware** `datetime.datetime` object
+* `to_naive_utc`: converts any datetime-like value to a **naive** `datetime.datetime` object (assumes UTC)
+* `now`: returns the current UTC time as a **UTC-aware** `datetime.datetime` object
 * `to_timedelta`: converts any timedelta-like value to `datetime.timedelta`
 
 ```python
@@ -61,11 +63,20 @@ def to_timedelta(value: Union[
 
 ...
 
-from to_utc import to_utc, to_timedelta
+from to_utc import to_utc, to_naive_utc, now, to_timedelta
 
+# Convert to UTC-aware datetime
 to_utc("2024-01-01T15:00:00+03:00")  # -> datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
 to_utc(1754942420)  # -> datetime(2025, 08, 11, 20, 0, 20, tzinfo=timezone.utc)
 
+# Convert to naive UTC datetime
+to_naive_utc("2024-01-01T15:00:00+03:00")  # -> datetime(2024, 1, 1, 12, 0, 0)
+to_naive_utc(1754942420)  # -> datetime(2025, 08, 11, 20, 0, 20)
+
+# Get current UTC time
+now()  # -> datetime(2025, 11, 10, 14, 30, 45, 123456, tzinfo=timezone.utc)
+
+# Convert to timedelta
 to_timedelta(120)    # -> timedelta(minutes=2)
 to_timedelta("1h30m15s")    # -> timedelta(hours=1, minutes=30, seconds=15)
 ```
