@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from .to_utc import DatetimeLike, to_utc
+from to_utc.to_utc import DatetimeLike, to_utc
 
 
 def to_naive_utc(

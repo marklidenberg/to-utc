@@ -83,9 +83,12 @@ def _from_epoch_like(
                 float(val) / div,
                 tz=timezone.utc,
             )
-        except Exception:
+        except (ValueError, OSError, OverflowError):
             continue
-    raise Exception(f"Numeric out of bounds for datetime: {val}")
+    raise ValueError(
+        f"Numeric value {val} is out of valid datetime range "
+        f"(tried as seconds, milliseconds, and microseconds)"
+    )
 
 
 def to_utc(
@@ -96,11 +99,7 @@ def to_utc(
     # - Pendulum
 
     if HAS_PENDULUM and isinstance(value, pendulum.DateTime):
-        return (
-            value.in_timezone(pendulum.UTC)
-            .in_timezone("UTC")
-            .replace(tzinfo=timezone.utc)
-        )
+        return value.in_timezone("UTC").replace(tzinfo=timezone.utc)
 
     # - Builtin datetime/date
 
@@ -125,14 +124,14 @@ def to_utc(
         if value.tz is not None:
             return value.tz_convert("UTC").to_pydatetime()
         if value is pd.NaT:
-            raise Exception("pandas.NaT is not a valid datetime")
+            raise ValueError("pandas.NaT is not a valid datetime")
         return value.to_pydatetime().replace(tzinfo=timezone.utc)  # naive, add UTC
 
     # - Numpy.datetime64
 
     if HAS_NUMPY and isinstance(value, np.datetime64):
         if str(value) == "NaT":
-            raise Exception("numpy.datetime64('NaT') is not a valid datetime")
+            raise ValueError("numpy.datetime64('NaT') is not a valid datetime")
 
         # Use pandas for robust conversion if available
         if HAS_PANDAS:
@@ -178,10 +177,10 @@ def to_utc(
 
         try:
             return _ensure_utc(parse_date(s))
-        except Exception:
-            raise Exception(f"Unknown string datetime format: {value}")
+        except (ValueError, TypeError) as e:
+            raise ValueError(f"Unable to parse datetime string: {value}") from e
 
-    raise Exception(f"Unknown datetime type: {type(value)!r}")
+    raise TypeError(f"Cannot convert type {type(value).__name__} to datetime")
 
 
 def test():
@@ -257,7 +256,7 @@ def test():
 
     # - Numpy
 
-    dt64 = np.datetime64("2024-03-01T12:00:00Z")
+    dt64 = np.datetime64("2024-03-01T12:00:00")
     assert to_utc(dt64) == datetime(2024, 3, 1, 12, 0, 0, tzinfo=timezone.utc)
     dt64_local = np.datetime64("2024-03-01T12:00:00")  # treated as naive
 

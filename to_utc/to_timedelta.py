@@ -10,21 +10,21 @@ try:
     import pandas as pd
 
     HAS_PANDAS = True
-except Exception:
+except ImportError:
     HAS_PANDAS = False
 
 try:
     import numpy as np
 
     HAS_NUMPY = True
-except Exception:
+except ImportError:
     HAS_NUMPY = False
 
 try:
     import pendulum
 
     HAS_PENDULUM = True
-except Exception:
+except ImportError:
     HAS_PENDULUM = False
 
 
@@ -97,9 +97,9 @@ def to_timedelta(
                     seconds=n * _UNIT_SECONDS[u],
                 )
 
-            raise Exception(f"Unknown timedelta string: {value}")
+            raise ValueError(f"Unknown timedelta string format: {value}")
 
-        except Exception:
+        except ValueError:
             # Fallback: words
 
             _WORD_UNITS = {
@@ -120,11 +120,11 @@ def to_timedelta(
             # e.g., "2 hours 30 minutes", "1 day", "5min 10sec"
             tokens = re.findall(r"(\d+)\s*([a-zA-Z]+)", value.lower())
             if not tokens:
-                raise Exception("Bad input str")
+                raise ValueError(f"Invalid timedelta string format: {value}")
             total = 0
             for num, unit in tokens:
                 if unit not in _WORD_UNITS:
-                    raise Exception("Bad input str")
+                    raise ValueError(f"Unknown time unit '{unit}' in string: {value}")
                 total += int(num) * _WORD_UNITS[unit]
             return timedelta(
                 seconds=total,
@@ -134,14 +134,14 @@ def to_timedelta(
 
     if HAS_PANDAS and isinstance(value, pd.Timedelta):
         if value is pd.NaT:
-            raise Exception("pandas.NaT is not valid")
+            raise ValueError("pandas.NaT is not a valid timedelta")
         return value.to_pytimedelta()
 
     # - Numpy timedelta64
 
     if HAS_NUMPY and isinstance(value, np.timedelta64):
         if str(value) == "NaT":
-            raise Exception("numpy.timedelta64('NaT') is not valid")
+            raise ValueError("numpy.timedelta64('NaT') is not a valid timedelta")
 
         # Prefer pandas if present for edge units
         if HAS_PANDAS:
@@ -153,8 +153,8 @@ def to_timedelta(
         # Convert to ns
         try:
             ns = value.astype("timedelta64[ns]").astype("int64")
-        except Exception:
-            raise Exception("Unsupported numpy timedelta64 unit (likely months/years)")
+        except (ValueError, TypeError):
+            raise ValueError("Unsupported numpy timedelta64 unit (likely months/years)")
 
         # Convert ns -> seconds + microseconds precisely
         seconds, nanos_rem = divmod(int(ns), 1_000_000_000)
@@ -167,23 +167,18 @@ def to_timedelta(
     # - Numpy numeric scalars
 
     if HAS_NUMPY and isinstance(value, (np.integer, np.floating)):
-        if isinstance(value, np.timedelta64):
-            return timedelta(
-                seconds=value / np.timedelta64(1, "s"),
-            )
-        else:
-            return timedelta(
-                seconds=float(value),
-            )
+        return timedelta(
+            seconds=float(value),
+        )
 
     # - Pendulum Duration
 
     if HAS_PENDULUM and isinstance(value, pendulum.Duration):
         return timedelta(
-            seconds=int(value.total_seconds()),
+            seconds=float(value.total_seconds()),
         )
 
-    raise Exception(f"Unknown timedelta type: {type(value)!r}")
+    raise TypeError(f"Cannot convert type {type(value).__name__} to timedelta")
 
 
 def test():
