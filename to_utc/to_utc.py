@@ -67,10 +67,9 @@ def _ensure_utc(
 ) -> datetime:
     """Return UTC-aware datetime."""
     if dt.tzinfo:
-        dt = dt.astimezone(timezone.utc)
+        return dt.astimezone(timezone.utc)
     else:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt
+        return dt.replace(tzinfo=timezone.utc)
 
 
 def _from_epoch_like(
@@ -162,11 +161,6 @@ def to_utc(
 
         s = value.strip().lower()
 
-        # - Now
-
-        if s == "now":
-            return datetime.now(timezone.utc)
-
         # - Try common patterns first
 
         for pattern in COMMON_DATETIME_PATTERNS:
@@ -198,7 +192,6 @@ def test():
     assert to_utc("2025-08-11T14:23:45Z") == datetime(
         2025, 8, 11, 14, 23, 45, tzinfo=timezone.utc
     )
-    assert isinstance(to_utc("now"), datetime)
 
     # - Datetime/date
 
