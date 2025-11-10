@@ -99,7 +99,8 @@ def to_utc(
     # - Pendulum
 
     if HAS_PENDULUM and isinstance(value, pendulum.DateTime):
-        return value.in_timezone("UTC").replace(tzinfo=timezone.utc)
+        # Convert to stdlib datetime with timezone.utc
+        return _ensure_utc(value.in_timezone("UTC"))
 
     # - Builtin datetime/date
 
@@ -116,7 +117,8 @@ def to_utc(
     # - Arrow
 
     if HAS_ARROW and isinstance(value, arrow.Arrow):
-        return value.to("UTC").datetime.replace(tzinfo=timezone.utc)
+        # Arrow's .to("UTC").datetime already returns timezone-aware datetime
+        return _ensure_utc(value.to("UTC").datetime)
 
     # - Pandas.Timestamp
 
