@@ -1414,8 +1414,11 @@ wheels = [
 
 [[package]]
 name = "to-utc"
-version = "0.1.2"
+version = "0.2.0"
 source = { editable = "." }
+dependencies = [
+    { name = "python-dateutil" },
+]
 
 [package.optional-dependencies]
 dev = [
@@ -1443,6 +1446,7 @@ requires-dist = [
     { name = "numpy", marker = "extra == 'dev'", specifier = ">=1.24.4" },
     { name = "pandas", marker = "extra == 'dev'", specifier = ">=2.0.3" },
     { name = "pendulum", marker = "extra == 'dev'", specifier = ">=3.0.0" },
+    { name = "python-dateutil", specifier = ">=2.9.0.post0" },
     { name = "twine", marker = "extra == 'dev'", specifier = ">=6.1.0" },
 ]
 provides-extras = ["dev"]
