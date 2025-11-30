@@ -23,7 +23,7 @@ dependencies = [
     "python-dateutil>=2.9.0.post0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "build>=1.2.2.post1",
     "twine>=6.1.0",
@@ -33,7 +33,7 @@ dev = [
     "arrow>=1.3.0",
     "dony>=0.2.1",
     "freezegun>=1.5.5"
-] # uv pip install ".[dev]"
+]
 
 [build-system]
 requires = ["hatchling"]
