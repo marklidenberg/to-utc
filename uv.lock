@@ -1414,13 +1414,13 @@ wheels = [
 
 [[package]]
 name = "to-utc"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "python-dateutil" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "arrow" },
     { name = "build" },
@@ -1438,18 +1438,19 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "arrow", marker = "extra == 'dev'", specifier = ">=1.3.0" },
-    { name = "build", marker = "extra == 'dev'", specifier = ">=1.2.2.post1" },
-    { name = "dony", marker = "extra == 'dev'", specifier = ">=0.2.1" },
-    { name = "freezegun", marker = "extra == 'dev'", specifier = ">=1.5.5" },
-    { name = "numpy", marker = "extra == 'dev'", specifier = ">=1.24.4" },
-    { name = "pandas", marker = "extra == 'dev'", specifier = ">=2.0.3" },
-    { name = "pendulum", marker = "extra == 'dev'", specifier = ">=3.0.0" },
-    { name = "python-dateutil", specifier = ">=2.9.0.post0" },
-    { name = "twine", marker = "extra == 'dev'", specifier = ">=6.1.0" },
+requires-dist = [{ name = "python-dateutil", specifier = ">=2.9.0.post0" }]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "arrow", specifier = ">=1.3.0" },
+    { name = "build", specifier = ">=1.2.2.post1" },
+    { name = "dony", specifier = ">=0.2.0" },
+    { name = "freezegun", specifier = ">=1.5.5" },
+    { name = "numpy", specifier = ">=1.24.4" },
+    { name = "pandas", specifier = ">=2.0.3" },
+    { name = "pendulum", specifier = ">=3.0.0" },
+    { name = "twine", specifier = ">=6.1.0" },
 ]
-provides-extras = ["dev"]
 
 [[package]]
 name = "tomli"
