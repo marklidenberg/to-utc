@@ -7,6 +7,34 @@ Timezones are error-prone. The safest approach is to store and process datetimes
 * `now`: returns the current UTC time as a **UTC-aware** `datetime.datetime` object
 * `to_timedelta`: converts any timedelta-like value to `datetime.timedelta`
 
+
+```python
+>>> from to_utc import to_utc, to_naive_utc, now, to_timedelta
+
+>>> to_utc("2024-01-01T15:00:00+03:00")
+datetime.datetime(2024, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc)
+
+>>> to_utc(1754942420)
+datetime.datetime(2025, 8, 11, 20, 0, 20, tzinfo=datetime.timezone.utc)
+
+>>> to_naive_utc("2024-01-01T15:00:00+03:00")
+datetime.datetime(2024, 1, 1, 12, 0, 0)
+
+>>> to_naive_utc(1754942420)
+datetime.datetime(2025, 8, 11, 20, 0, 20)
+
+>>> now()
+datetime.datetime(2025, 11, 10, 14, 30, 45, 123456, tzinfo=datetime.timezone.utc)
+
+>>> to_timedelta(120)
+datetime.timedelta(seconds=120)
+
+>>> to_timedelta("1h30m15s")
+datetime.timedelta(seconds=5415)
+```
+
+## Interface 
+
 ```python
 def to_utc(value: Union[
     datetime,
@@ -71,28 +99,9 @@ def to_timedelta(value: Union[
     """
     - Numbers: interpreted as seconds.
     - Strings are converted as follows:
-      1. Parse compact format (\d+d\d+h\d+m\d+s, e.g. "3d5h12m40s")  
+      1. Parse compact format (\d+d\d+h\d+m\d+s, e.g. "3d5h12m40s")
       2. Parse word form ("2 hours 5 minutes", e.g. "1 day 3 hours")
     - Common timedelta-like objects converted appropriately (timedelta, pd.Timedelta, ...)
     """
     pass
-
-...
-
-from to_utc import to_utc, to_naive_utc, now, to_timedelta
-
-# Convert to UTC-aware datetime
-to_utc("2024-01-01T15:00:00+03:00")  # -> datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
-to_utc(1754942420)  # -> datetime(2025, 08, 11, 20, 0, 20, tzinfo=timezone.utc)
-
-# Convert to naive UTC datetime
-to_naive_utc("2024-01-01T15:00:00+03:00")  # -> datetime(2024, 1, 1, 12, 0, 0)
-to_naive_utc(1754942420)  # -> datetime(2025, 08, 11, 20, 0, 20)
-
-# Get current UTC time
-now()  # -> datetime(2025, 11, 10, 14, 30, 45, 123456, tzinfo=timezone.utc)
-
-# Convert to timedelta
-to_timedelta(120)    # -> timedelta(minutes=2)
-to_timedelta("1h30m15s")    # -> timedelta(hours=1, minutes=30, seconds=15)
 ```
