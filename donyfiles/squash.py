@@ -35,7 +35,7 @@ def squash(
 
     # - Get default branch if not set
 
-    new_branch = new_branch or f"{github_username}-flow"
+    new_branch = new_branch or f"{github_username}-dev"
 
     # - Get current branch
 
