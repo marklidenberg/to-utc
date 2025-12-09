@@ -35,7 +35,7 @@ datetime.datetime(2025, 8, 11, 20, 0, 20)
 datetime.datetime(2025, 11, 10, 14, 30, 45, 123456, tzinfo=datetime.timezone.utc)
 ```
 
-* `to_timedelta`: `timedelta-like` → `datetime.timedelta`
+* `to_timedelta`: timedelta-like → `datetime.timedelta`
 
 ```python
 >>> from to_utc import to_timedelta
