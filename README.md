@@ -20,6 +20,10 @@ def to_timedelta(value) -> timedelta:
     ...
 ```
 
+## Non-goals 
+
+- Performance is not optimized. 
+
 ## API Reference
 
 ```python
