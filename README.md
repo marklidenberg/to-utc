@@ -9,12 +9,15 @@ def to_utc(value) -> datetime:
 
 def to_naive_utc(value) -> datetime:
     """Converts any datetime-like value to a naive UTC datetime."""
+    ...
 
 def now() -> datetime:
     """Returns the current UTC time as a UTC-aware datetime."""
+    ...
 
 def to_timedelta(value) -> timedelta:
     """Converts any timedelta-like value to datetime.timedelta."""
+    ...
 ```
 
 ## API Reference
