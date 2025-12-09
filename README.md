@@ -2,6 +2,14 @@
 
 Timezones are error-prone. The safest approach is to store and process datetimes in **UTC** consistently.
 
+## Installation
+
+```bash
+pip install to-utc
+```
+
+## Usage
+
 ```python
 def to_utc(value) -> datetime:
     """Converts any datetime-like value to a UTC-aware datetime."""
@@ -86,3 +94,11 @@ def to_timedelta(value: Union[
     """
     pass
 ```
+
+## License
+
+MIT License
+
+## Author
+
+Mark Lidenberg [marklidenberg@gmail.com](mailto:marklidenberg@gmail.com)
