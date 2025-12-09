@@ -2,38 +2,29 @@
 
 Timezones are error-prone. The safest approach is to store and process datetimes in **UTC** consistently.
 
-* `to_utc`: converts any datetime-like value to a **UTC-aware** `datetime.datetime` object
-* `to_naive_utc`: converts any datetime-like value to a **naive** `datetime.datetime` object (assumes UTC)
-* `now`: returns the current UTC time as a **UTC-aware** `datetime.datetime` object
-* `to_timedelta`: converts any timedelta-like value to `datetime.timedelta`
-
-
 ```python
->>> from to_utc import to_utc, to_naive_utc, now, to_timedelta
+def to_utc(value) -> datetime:
+    """Converts any datetime-like value to a UTC-aware datetime."""
+    ...
 
->>> to_utc("2024-01-01T15:00:00+03:00")
-datetime.datetime(2024, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc)
+def to_naive_utc(value) -> datetime:
+    """Converts any datetime-like value to a naive UTC datetime."""
+    ...
 
->>> to_utc(1754942420)
-datetime.datetime(2025, 8, 11, 20, 0, 20, tzinfo=datetime.timezone.utc)
+def now() -> datetime:
+    """Returns the current UTC time as a UTC-aware datetime."""
+    ...
 
->>> to_naive_utc("2024-01-01T15:00:00+03:00")
-datetime.datetime(2024, 1, 1, 12, 0, 0)
-
->>> to_naive_utc(1754942420)
-datetime.datetime(2025, 8, 11, 20, 0, 20)
-
->>> now()
-datetime.datetime(2025, 11, 10, 14, 30, 45, 123456, tzinfo=datetime.timezone.utc)
-
->>> to_timedelta(120)
-datetime.timedelta(seconds=120)
-
->>> to_timedelta("1h30m15s")
-datetime.timedelta(seconds=5415)
+def to_timedelta(value) -> timedelta:
+    """Converts any timedelta-like value to datetime.timedelta."""
+    ...
 ```
 
-## Interface 
+## Non-goals 
+
+- Performance is not optimized. 
+
+## API Reference
 
 ```python
 def to_utc(value: Union[
@@ -52,17 +43,7 @@ def to_utc(value: Union[
 
       - Numbers are handled as timestamps (try seconds → milliseconds → microseconds)
       - Strings are converted as follows:
-        1. Try fixed patterns first:
-          - %Y-%m-%d
-          - %Y-%m-%d %H:%M:%S
-          - %Y-%m-%dT%H:%M:%S
-          - %Y-%m-%dT%H:%M:%SZ
-          - %Y-%m-%d %H:%M:%S.%f
-          - %Y-%m-%dT%H:%M:%S.%fZ
-          - %Y%m%d
-          - %Y%m%d%H%M%S
-          - %Y-%m-%d %H:%M:%S%z
-          - %Y-%m-%dT%H:%M:%S%z
+        1. Try fixed patterns first: ("%Y-%m-%d", "%Y-%m-%d %H:%M:%S", ...)
         2. Fallback to dateutil.parser.parse
       - Common datetime-like objects are converted as expected (datetime, date, pd.Timestamp, ...)
       - Naive datetimes are assumed to be UTC
