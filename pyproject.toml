@@ -20,8 +20,6 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "dony>=0.5.1",
-    "marklidenberg-donyfiles>=0.4.0",
     "python-dateutil>=2.9.0.post0",
 ]
 
@@ -33,9 +31,11 @@ dev = [
     "numpy>=1.24.4",
     "pendulum>=3.0.0",
     "arrow>=1.3.0",
-    "dony>=0.2.1",
+    "dony>=0.5.1",
     "freezegun>=1.5.5",
-    "marklidenberg-donyfiles>=0.3.0",
+    "marklidenberg-donyfiles>=0.4.0",
+    "ty>=0.0.14",
+    "fire>=0.7.0",
 ]
 
 [build-system]

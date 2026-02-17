@@ -146,7 +146,7 @@ def to_timedelta(
         # Prefer pandas if present for edge units
         if HAS_PANDAS:
             # pd.to_timedelta returns Timedelta; .to_pytimedelta -> datetime.timedelta
-            return pd.to_timedelta(value).to_pytimedelta()
+            return pd.to_timedelta(value).to_pytimedelta()  # type: ignore[arg-type]
 
         # Fallback: normalize to nanoseconds then build timedelta
         # Works for time-based units. Month/Year are not supported

@@ -136,7 +136,7 @@ def to_utc(
 
         # Use pandas for robust conversion if available
         if HAS_PANDAS:
-            return pd.to_datetime(
+            return pd.to_datetime(  # type: ignore[arg-type]
                 value,
                 utc=True,
             ).to_pydatetime()
@@ -244,7 +244,7 @@ def test():
     )
     assert to_utc(ts_aware) == datetime(2024, 2, 1, 9, 30, 5, tzinfo=timezone.utc)
     try:
-        to_utc(pd.NaT)  # should raise
+        to_utc(pd.NaT)  # type: ignore[arg-type]  # should raise
         assert False, "Expected exception for pandas.NaT"
     except Exception:
         pass
@@ -257,7 +257,7 @@ def test():
 
     # dateutil will treat as naive local then _ensure_utc adds UTC
     assert to_utc(dt64_local) == datetime(2024, 3, 1, 12, 0, 0, tzinfo=timezone.utc)
-    assert to_utc(np.int64(1_700_000_000)) == datetime.fromtimestamp(
+    assert to_utc(np.int64(1_700_000_000)) == datetime.fromtimestamp(  # type: ignore[arg-type]
         1_700_000_000,
         tz=timezone.utc,
     )
